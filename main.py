@@ -12,8 +12,34 @@ def shortest_shortest_path(graph, source):
       a dict where each key is a vertex and the value is a tuple of
       (shortest path weight, shortest path number of edges). See test case for example.
     """
-    ### TODO
-    pass
+    shortest_paths = {vertex: (float('inf'), float('inf')) for vertex in graph}
+    shortest_paths[source] = (0, 0)
+    def compare_paths(path1, path2):
+        weight1, edges1 = path1
+        weight2, edges2 = path2
+        if weight1 < weight2:
+            return -1
+        elif weight1 > weight2:
+            return 1
+        elif edges1 < edges2:
+            return -1
+        elif edges1 > edges2:
+            return 1
+        else:
+            return 0
+    queue = [(0, 0, source)]
+    while queue:
+        weight, edges, current_node = heappop(queue)
+        if compare_paths((weight, edges), shortest_paths[current_node]) > 0:
+            continue
+        for neighbor, edge_weight in graph[current_node]:
+            new_weight = weight + edge_weight
+            new_edges = edges + 1
+            if compare_paths((new_weight, new_edges), shortest_paths[neighbor]) < 0:
+                shortest_paths[neighbor] = (new_weight, new_edges)
+                heappush(queue, (new_weight, new_edges, neighbor))
+
+    return shortest_paths
     
 def test_shortest_shortest_path():
 
@@ -40,8 +66,17 @@ def bfs_path(graph, source):
       a dict where each key is a vertex and the value is the parent of 
       that vertex in the shortest path tree.
     """
-    ###TODO
-    pass
+    parents = {vertex: None for vertex in graph}
+    parents[source] = None
+    queue = deque([source])
+    while queue:
+        current_node = queue.popleft()
+        for neighbor in graph[current_node]:
+            if parents[neighbor] is None:
+                parents[neighbor] = current_node
+                queue.append(neighbor)
+
+    return parents
 
 def get_sample_graph():
      return {'s': {'a', 'b'},
@@ -65,8 +100,14 @@ def get_path(parents, destination):
       The shortest path from the source node to this destination node 
       (excluding the destination node itself). See test_get_path for an example.
     """
-    ###TODO
-    pass
+    path = []
+    current_node = destination
+    while current_node is not None:
+        path.append(current_node)
+        current_node = parents[current_node]
+    path.reverse()
+    path_string = "".join(path[:-1])
+    return path_string
 
 def test_get_path():
     graph = get_sample_graph()
